@@ -1,3 +1,9 @@
+import rp2
+import machine
+from machine import Pin
+
+machine.freq()          # get the current frequency of the CPU
+machine.freq(240000000)  # set the CPU frequency to 240 MHz
 pinout_PICO = {
     'pin_CNTRL1_VCC': '3V3',
     'pin_FSR1_Pin_2': 'GPIO26_ADC0',
