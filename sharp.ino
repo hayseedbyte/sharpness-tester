@@ -29,12 +29,17 @@ int lastCalibState = 0; // previous state of the button
 int zeroState = 0;
 int lastZeroState = 0;
 int pressureAnalogPin = 26;
-int pressure = 0;
 int lastPressure;
 long lastReading = 0;
 int reading;
 int highest;
 int lastHighest;
+const int numPressure = 10;
+
+int pressure[numPressure]; // the pressure from the analog input
+int readIndex = 0;         // the index of the current Pressure
+int totalPressure = 0;     // the running totalPressure
+int averagePressure = 0;   // the averagePressure
 
 void setup(void)
 {
@@ -53,13 +58,16 @@ void setup(void)
 
     gfx->setCursor(10, 10);
     gfx->setTextColor(WHITE, BLACK);
-
+    // initialize all the pressure to 0:
+    for (int thisPressure = 0; thisPressure < numPressure; thisPressure++)
+    {
+        pressure[thisPressure] = 0;
+    }
     delay(5000); // 5 seconds
 }
 
 void loop()
 {
-    pressure = analogRead(pressureAnalogPin);
     calibState = digitalRead(calibPin);
     zeroState = digitalRead(zeroPin);
     long reading = scale.get_units(5);
@@ -98,10 +106,25 @@ void loop()
     {
         drawReading(reading);
     }
-    if (pressure != lastPressure)
+    // subtract the last Pressure:
+    totalPressure = totalPressure - pressure[readIndex];
+    // read from the sensor:
+    pressure[readIndex] = analogRead(pressureAnalogPin);
+    // add the Pressure to the totalPressure:
+    totalPressure = totalPressure + pressure[readIndex];
+    // advance to the next position in the array:
+    readIndex = readIndex + 1;
+
+    // if we're at the end of the array...
+    if (readIndex >= numPressure)
     {
-        drawPressure(pressure);
+        // ...wrap around to the beginning:
+        readIndex = 0;
     }
+    // calculate the averagePressure:
+    averagePressure = totalPressure / numPressure;
+    delay(1); // delay in between reads for stability
+    drawPressure(averagePressure);
 }
 
 void buttonWait(int buttonPin)
