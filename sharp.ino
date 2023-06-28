@@ -19,23 +19,31 @@ Arduino_GFX *gfx = new Arduino_ST7789(bus, 12, 3, true, 240, 320);
 
 const int LOADCELL_DOUT_PIN = 2;
 const int LOADCELL_SCK_PIN = 3;
-float calibration_factor = -466;
+float calibration_factor = -466; //  adjusted by the calibrate() function
+const int calibration_weight = 200;
 HX711 scale;
-
+// input pins
 const int calibPin = 5; // the number of the pushbutton pin
 const int zeroPin = 4;
+int pressureAnalogPin = 26;
+
+//button states
 int calibState = 0;     // current state of the button
 int lastCalibState = 0; // previous state of the button
 int zeroState = 0;
 int lastZeroState = 0;
-int pressureAnalogPin = 26;
+
+// weight and pressure readings
 int lastPressure;
 long lastReading = 0;
 int reading;
 int highest;
 int lastHighest;
-const int numPressure = 10;
 
+const  pressure_pos = 
+
+// smooth out pressure reading
+const int numPressure = 10;
 int pressure[numPressure]; // the pressure from the analog input
 int readIndex = 0;         // the index of the current Pressure
 int totalPressure = 0;     // the running totalPressure
@@ -43,18 +51,21 @@ int averagePressure = 0;   // the averagePressure
 
 void setup(void)
 {
+    // initialize graphics
     gfx->begin();
     gfx->fillScreen(BLACK);
     gfx->setTextSize(5);
-    scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+    scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); //initialize scale
+    // set pin modes
     pinMode(calibPin, INPUT);
     pinMode(zeroPin, INPUT);
     pinMode(pressureAnalogPin, INPUT);
-    scale.set_scale(calibration_factor); // Adjust to this calibration
+    
 #ifdef GFX_BL
     pinMode(GFX_BL, OUTPUT);
     digitalWrite(GFX_BL, HIGH);
 #endif
+    scale.set_scale(calibration_factor); // Adjust to this calibration
 
     gfx->setCursor(10, 10);
     gfx->setTextColor(WHITE, BLACK);
@@ -71,7 +82,6 @@ void loop()
     calibState = digitalRead(calibPin);
     zeroState = digitalRead(zeroPin);
     long reading = scale.get_units(5);
-
     // compare the calibState to its previous state
     if (calibState != lastCalibState)
     {
@@ -98,7 +108,7 @@ void loop()
     {
         highest = reading;
     }
-    if (highest != lastHighest)
+    if (highest != lastHighest) // only write if number changes
     {
         drawHighest(highest);
     }
@@ -142,36 +152,36 @@ void buttonWait(int buttonPin)
 void calibrate()
 {
 
-    gfx->setTextSize(3);
-    gfx->fillScreen(BLACK);
-    gfx->setCursor(10, 10);
+    gfx->setTextSize(3); // Make text smaller
+    gfx->fillScreen(BLACK); // blank screen
+    gfx->setCursor(10, 10); 
     gfx->println("Remove all weight from \n scale then press \n calibrate");
-    buttonWait(5);
+    buttonWait(5); // wait on user to press button
     delay(50);
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
     gfx->println("Zeroing...");
     delay(50);
-    scale.set_scale();
+    scale.set_scale(); // reset scale to 0
     scale.tare(); // Reset the scale to 0
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
-    gfx->println("Place 200g weight \n on scale then \n press calibrate.");
+    gfx->println("Place %ig weight \n on scale then \n press calibrate.", calibration_weight);
     buttonWait(5);
     delay(50);
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
     gfx->println("Calibrating....");
-    long current = scale.get_units(10);
-    calibration_factor = current / 200;
+    long current = scale.get_units(10); // average of ten readings
+    calibration_factor = current / calibration_weight; // calculate new calibration factor
     scale.set_scale(calibration_factor);
     delay(50);
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
     gfx->println("Done!");
-    highest = 0;
+    highest = 0; // reset highest
     delay(50);
-    gfx->setTextSize(5);
+    gfx->setTextSize(5); // set text back to larger size
     delay(100);
 }
 
@@ -179,7 +189,7 @@ void drawHighest(int highest)
 {
 
     gfx->setCursor(10, 10);
-    gfx->println("---------");
+    gfx->println("---------"); // fill with dashes to clear line
     gfx->setCursor(10, 10);
     gfx->println(highest);
 }
@@ -192,11 +202,11 @@ void drawReading(int reading)
 }
 void drawPressure(int pressure)
 {
-    if (pressure < 250)
+    if (pressure < 90)
     {
-        gfx->setTextColor(YELLOW, BLACK);
+        gfx->setTextColor(YELLOW, BLACK); // yellow text with black background to overwrite
     }
-    else if (pressure >= 250 && pressure < 500)
+    else if (pressure >= 90 && pressure < 110)
     {
         gfx->setTextColor(GREEN, BLACK);
     }
@@ -205,10 +215,10 @@ void drawPressure(int pressure)
         gfx->setTextColor(RED, BLACK);
     }
     gfx->setCursor(10, 150);
-    gfx->println("---------");
+    gfx->println("---------"); // fill with dashes to clear line
     gfx->setCursor(10, 150);
     gfx->println(pressure);
-    gfx->setTextColor(WHITE, BLACK);
+    gfx->setTextColor(WHITE, BLACK); // set text color back to default
 }
 int zero()
 {
