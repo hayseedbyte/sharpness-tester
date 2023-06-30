@@ -27,7 +27,7 @@ const int calibPin = 5; // the number of the pushbutton pin
 const int zeroPin = 4;
 int pressureAnalogPin = 26;
 
-//button states
+// button states
 int calibState = 0;     // current state of the button
 int lastCalibState = 0; // previous state of the button
 int zeroState = 0;
@@ -39,8 +39,6 @@ long lastReading = 0;
 int reading;
 int highest;
 int lastHighest;
-
-const  pressure_pos = 
 
 // smooth out pressure reading
 const int numPressure = 10;
@@ -55,12 +53,12 @@ void setup(void)
     gfx->begin();
     gfx->fillScreen(BLACK);
     gfx->setTextSize(5);
-    scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); //initialize scale
+    scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN); // initialize scale
     // set pin modes
     pinMode(calibPin, INPUT);
     pinMode(zeroPin, INPUT);
     pinMode(pressureAnalogPin, INPUT);
-    
+
 #ifdef GFX_BL
     pinMode(GFX_BL, OUTPUT);
     digitalWrite(GFX_BL, HIGH);
@@ -152,9 +150,9 @@ void buttonWait(int buttonPin)
 void calibrate()
 {
 
-    gfx->setTextSize(3); // Make text smaller
+    gfx->setTextSize(3);    // Make text smaller
     gfx->fillScreen(BLACK); // blank screen
-    gfx->setCursor(10, 10); 
+    gfx->setCursor(10, 10);
     gfx->println("Remove all weight from \n scale then press \n calibrate");
     buttonWait(5); // wait on user to press button
     delay(50);
@@ -163,7 +161,7 @@ void calibrate()
     gfx->println("Zeroing...");
     delay(50);
     scale.set_scale(); // reset scale to 0
-    scale.tare(); // Reset the scale to 0
+    scale.tare();      // Reset the scale to 0
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
     gfx->println("Place %ig weight \n on scale then \n press calibrate.", calibration_weight);
@@ -172,7 +170,7 @@ void calibrate()
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
     gfx->println("Calibrating....");
-    long current = scale.get_units(10); // average of ten readings
+    long current = scale.get_units(10);                // average of ten readings
     calibration_factor = current / calibration_weight; // calculate new calibration factor
     scale.set_scale(calibration_factor);
     delay(50);
