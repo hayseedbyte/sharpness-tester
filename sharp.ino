@@ -2,6 +2,8 @@
 #include <Adafruit_ST77xx.h>
 #include <ArduinoGraphics.h>
 #include <Arduino_GFX_Library.h>
+// #include "extern/../pico-scale/include/hx711_scale_adaptor.h"
+// #include "extern/../pico-scale/include/scale.h"
 #include <stdio.h>
 #include "stdlib.h"
 #include "hardware/adc.h"
@@ -46,6 +48,8 @@ int pressure[numPressure]; // the pressure from the analog input
 int readIndex = 0;         // the index of the current Pressure
 int totalPressure = 0;     // the running totalPressure
 int averagePressure = 0;   // the averagePressure
+
+int offset = 2;
 
 void setup(void)
 {
@@ -106,11 +110,11 @@ void loop()
     {
         highest = reading;
     }
-    if (highest != lastHighest) // only write if number changes
+    if (highest > lastHighest + offset || highest < lastHighest - offset) // only write if number changes
     {
         drawHighest(highest);
     }
-    if (reading != lastReading)
+    if (reading > lastReading + offset || reading < lastReading - offset)
     {
         drawReading(reading);
     }
@@ -131,8 +135,10 @@ void loop()
     }
     // calculate the averagePressure:
     averagePressure = totalPressure / numPressure;
-    delay(1); // delay in between reads for stability
+    delay(10); // delay in between reads for stability
     drawPressure(averagePressure);
+    lastReading = reading;
+    lastHighest = highest;
 }
 
 void buttonWait(int buttonPin)
@@ -164,7 +170,7 @@ void calibrate()
     scale.tare();      // Reset the scale to 0
     gfx->fillScreen(BLACK);
     gfx->setCursor(10, 10);
-    gfx->println("Place %ig weight \n on scale then \n press calibrate.", calibration_weight);
+    gfx->println("Place 200g weight \n on scale then \n press calibrate.");
     buttonWait(5);
     delay(50);
     gfx->fillScreen(BLACK);
@@ -178,6 +184,7 @@ void calibrate()
     gfx->setCursor(10, 10);
     gfx->println("Done!");
     highest = 0; // reset highest
+    drawHighest(highest);
     delay(50);
     gfx->setTextSize(5); // set text back to larger size
     delay(100);
@@ -200,27 +207,42 @@ void drawReading(int reading)
 }
 void drawPressure(int pressure)
 {
-    if (pressure < 90)
-    {
-        gfx->setTextColor(YELLOW, BLACK); // yellow text with black background to overwrite
-    }
-    else if (pressure >= 90 && pressure < 110)
-    {
-        gfx->setTextColor(GREEN, BLACK);
-    }
-    else
-    {
-        gfx->setTextColor(RED, BLACK);
-    }
     gfx->setCursor(10, 150);
+    gfx->setTextColor(WHITE, BLACK);
     gfx->println("---------"); // fill with dashes to clear line
-    gfx->setCursor(10, 150);
-    gfx->println(pressure);
+    if (pressure < 300)
+    {
+        gfx->setCursor(10, 150);
+        gfx->setTextColor(RED, BLACK); // yellow text with black background to overwrite
+        gfx->println("oo-------");
+    }
+    else if (pressure >= 300 && pressure < 600)
+    {
+        gfx->setCursor(10, 150);
+        gfx->setTextColor(YELLOW, BLACK); // yellow text with black background to overwrite
+        gfx->println("oooo-----");
+    }
+    else if (pressure >= 600 && pressure < 900)
+    {
+        gfx->setCursor(10, 150);
+        gfx->setTextColor(YELLOW, BLACK);
+        gfx->println("oooooo---");
+    }
+    else if (pressure >= 900)
+    {
+        gfx->setCursor(10, 150);
+        gfx->setTextColor(GREEN, BLACK);
+        gfx->println("ooooooooo");
+    }
+    // gfx->setCursor(10, 150);
+    // gfx->println("---------"); // fill with dashes to clear line
+    // gfx->setCursor(10, 150);
+    // gfx->println(pressure);
     gfx->setTextColor(WHITE, BLACK); // set text color back to default
 }
 int zero()
 {
-    scale.set_scale();
+    scale.set_scale(calibration_factor);
     scale.tare();
     delay(50);
     return 0;
