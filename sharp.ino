@@ -49,7 +49,7 @@ int readIndex = 0;         // the index of the current Pressure
 int totalPressure = 0;     // the running totalPressure
 int averagePressure = 0;   // the averagePressure
 
-int offset = 2;
+int offset = 1;
 
 void setup(void)
 {
@@ -210,35 +210,39 @@ void drawPressure(int pressure)
     gfx->setCursor(10, 150);
     gfx->setTextColor(WHITE, BLACK);
     gfx->println("---------"); // fill with dashes to clear line
-    if (pressure < 300)
+    if (pressure < 200)
     {
         gfx->setCursor(10, 150);
-        gfx->setTextColor(RED, BLACK); // yellow text with black background to overwrite
+        gfx->setTextColor(RED, BLACK); // red text with black background to overwrite
         gfx->println("oo-------");
     }
-    else if (pressure >= 300 && pressure < 600)
+    else if (pressure >= 200 && pressure < 600)
     {
         gfx->setCursor(10, 150);
         gfx->setTextColor(YELLOW, BLACK); // yellow text with black background to overwrite
         gfx->println("oooo-----");
     }
-    else if (pressure >= 600 && pressure < 900)
+    else if (pressure >= 600 && pressure < 1015)
     {
         gfx->setCursor(10, 150);
         gfx->setTextColor(YELLOW, BLACK);
         gfx->println("oooooo---");
     }
-    else if (pressure >= 900)
+    else if (pressure >= 1015)
     {
         gfx->setCursor(10, 150);
         gfx->setTextColor(GREEN, BLACK);
         gfx->println("ooooooooo");
     }
-    // gfx->setCursor(10, 150);
+    // gfx->setCursor(10, 200);
     // gfx->println("---------"); // fill with dashes to clear line
-    // gfx->setCursor(10, 150);
+    // gfx->setCursor(10, 200);
     // gfx->println(pressure);
     gfx->setTextColor(WHITE, BLACK); // set text color back to default
+    gfx->setCursor(10, 200);
+    gfx->println("---------"); // fill with dashes to clear line
+    gfx->setCursor(10, 200);
+    gfx->println(pressure);
 }
 int zero()
 {
