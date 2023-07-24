@@ -9,7 +9,6 @@
 #include "hardware/adc.h"
 #include <string.h>
 #define GFX_BL 13 // default backlight pin, you may replace DF_GFX_BL to actual backlight pin
-#include <Arduino_GFX_Library.h>
 #define TFT_BL 13
 //(DC, CS, SCK, MOSI, DIN, SPI)
 Arduino_DataBus *bus = new Arduino_RPiPicoSPI(8, 9, 10, -1, 11, spi1);
@@ -194,7 +193,7 @@ void drawHighest(int highest)
 {
 
     gfx->setCursor(10, 10);
-    gfx->println("---------"); // fill with dashes to clear line
+    gfx->println("-------- "); // fill with dashes to clear line
     gfx->setCursor(10, 10);
     gfx->println(highest);
 }
@@ -207,42 +206,42 @@ void drawReading(int reading)
 }
 void drawPressure(int pressure)
 {
+    // gfx->setCursor(10, 180);
+    // gfx->println("---------"); // fill with dashes to clear line
+    // gfx->setCursor(10, 180);
+    // gfx->println(pressure);
     gfx->setCursor(10, 150);
     gfx->setTextColor(WHITE, BLACK);
     gfx->println("---------"); // fill with dashes to clear line
-    if (pressure < 200)
+    if (pressure < 30)
     {
         gfx->setCursor(10, 150);
-        gfx->setTextColor(RED, BLACK); // red text with black background to overwrite
+        gfx->setTextColor(RED, BLACK); // yellow text with black background to overwrite
         gfx->println("oo-------");
     }
-    else if (pressure >= 200 && pressure < 600)
+    else if (pressure >= 30 && pressure < 60)
     {
         gfx->setCursor(10, 150);
         gfx->setTextColor(YELLOW, BLACK); // yellow text with black background to overwrite
         gfx->println("oooo-----");
     }
-    else if (pressure >= 600 && pressure < 1015)
+    else if (pressure >= 60 && pressure < 71)
     {
         gfx->setCursor(10, 150);
         gfx->setTextColor(YELLOW, BLACK);
         gfx->println("oooooo---");
     }
-    else if (pressure >= 1015)
+    else if (pressure >= 71)
     {
         gfx->setCursor(10, 150);
         gfx->setTextColor(GREEN, BLACK);
         gfx->println("ooooooooo");
     }
-    // gfx->setCursor(10, 200);
+    // gfx->setCursor(10, 150);
     // gfx->println("---------"); // fill with dashes to clear line
-    // gfx->setCursor(10, 200);
+    // gfx->setCursor(10, 150);
     // gfx->println(pressure);
     gfx->setTextColor(WHITE, BLACK); // set text color back to default
-    gfx->setCursor(10, 200);
-    gfx->println("---------"); // fill with dashes to clear line
-    gfx->setCursor(10, 200);
-    gfx->println(pressure);
 }
 int zero()
 {
